@@ -14,6 +14,15 @@ VIRTUAL_HEIGHT = 243
 
 PADDLE_SPEED = 200
 
+-- for background
+local backgrounds = {}
+local bgIndex = 1  -- To keep track of the current background image
+local bgY = 0      -- Initial Y position for scrolling
+local scrollSpeed = 30  -- Adjust the speed to control the scroll
+local imageChangeInterval = 2  -- Time interval to change background (in seconds)
+local timeElapsed = 0          -- Timer to keep track of time for image changes
+--
+
 function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
@@ -26,6 +35,12 @@ function love.load()
     scoreFont = love.graphics.newFont('font.ttf', 32)
 
     love.graphics.setFont(smallFont)
+
+    -- Load all images from the folder into the backgrounds table
+    for i = 1, 8 do  -- Assuming you have 5 images, adjust if you have more
+        local image = love.graphics.newImage("images/Blue Nebula " .. i .. " - 1024x1024.png")
+        table.insert(backgrounds, image)
+    end
 
     sounds = {
         ['paddle_hit'] = love.audio.newSource('sounds/paddle_hit.wav', 'static'),
@@ -58,6 +73,22 @@ function love.resize(w, h)
 end
 
 function love.update(dt)
+
+    -- Update the scroll position
+    bgY = bgY + scrollSpeed * dt
+
+    -- Reset the background position to create a seamless effect
+    local bgHeight = backgrounds[bgIndex]:getHeight()
+    if bgY >= bgHeight then
+        bgY = 0
+    end
+
+    -- Cycle through background images at the set interval
+    timeElapsed = timeElapsed + dt
+    if timeElapsed >= imageChangeInterval then
+        bgIndex = bgIndex % #backgrounds + 1  -- Move to the next image, loop back after the last
+        timeElapsed = 0  -- Reset the timer
+    end
 
     if gameState == 'serve' then
         ball.dy = math.random(-80,80)
@@ -189,7 +220,17 @@ function love.draw()
 
     push:start()
 
-    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+    -- love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+    local windowWidth, windowHeight = love.graphics.getDimensions()
+    local bgWidth, bgHeight = backgrounds[bgIndex]:getDimensions()
+    local scaleX = windowWidth / bgWidth
+    local scaleY = windowHeight / bgHeight
+
+    -- Draw two copies of the current background image for continuous scroll
+    love.graphics.draw(backgrounds[bgIndex], 0, bgY, 0, scaleX, scaleY)
+    love.graphics.draw(backgrounds[bgIndex], 0, bgY - bgHeight, 0, scaleX, scaleY)
+
+    -- Draw other game elements (paddles, ball, etc.)
 
     love.graphics.setFont(smallFont)
 
