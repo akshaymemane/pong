@@ -14,6 +14,15 @@ VIRTUAL_HEIGHT = 243
 
 PADDLE_SPEED = 200
 
+
+local background = love.graphics.newImage('images/background.png')
+local backgroundScroll = 0
+-- Set the scrolling speed
+local BACKGROUND_SCROLL_SPEED = 30
+-- Define the height of the image as the looping point for seamless scrolling
+local BACKGROUND_LOOPING_POINT = background:getHeight()
+
+
 function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
@@ -32,6 +41,8 @@ function love.load()
         ['score'] = love.audio.newSource('sounds/score.wav', 'static'),
         ['wall_hit'] = love.audio.newSource('sounds/wall_hit.wav', 'static'),
     }
+
+    
 
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
@@ -58,6 +69,8 @@ function love.resize(w, h)
 end
 
 function love.update(dt)
+
+    backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) % BACKGROUND_LOOPING_POINT
 
     if gameState == 'serve' then
         ball.dy = math.random(-80,80)
@@ -189,7 +202,9 @@ function love.draw()
 
     push:start()
 
-    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+    -- Draw the background image twice for seamless vertical scrolling
+    love.graphics.draw(background, 0, -backgroundScroll)
+    love.graphics.draw(background, 0, -backgroundScroll + BACKGROUND_LOOPING_POINT)
 
     love.graphics.setFont(smallFont)
 
