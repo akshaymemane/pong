@@ -36,6 +36,7 @@ function love.load()
 
     love.graphics.setFont(smallFont)
 
+
     sounds = {
         ['paddle_hit'] = love.audio.newSource('sounds/paddle_hit.wav', 'static'),
         ['score'] = love.audio.newSource('sounds/score.wav', 'static'),
